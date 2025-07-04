@@ -7,4 +7,11 @@ app = Flask(__name__)
 @app.route('/')
 
 def home_page():
-	return "<h1>Home Page</h1>"
+	return render_template("home.html")
+
+# Error Pages
+
+# Invalid URL
+@app.errorhandler(404)
+def page_not_found(e):
+	return render_template("404.html"), 404
