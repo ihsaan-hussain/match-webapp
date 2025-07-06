@@ -1,10 +1,8 @@
 from flask import Flask, render_template, flash
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from webforms import UserForm
 
 # Create a Flask Instance
 app = Flask(__name__)
@@ -36,8 +34,9 @@ class Users(db.Model):
 # Create a route decorator
 @app.route('/')
 
-def home_page():
-	return render_template("home.html")
+def create_account():
+	form = UserForm()
+	return render_template("create_account.html", form=form)
 
 # Error Pages
 
