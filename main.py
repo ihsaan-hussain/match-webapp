@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from webforms import UserForm, LoginForm
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user 
 
 # Create a Flask Instance
 app = Flask(__name__)
@@ -13,8 +14,12 @@ app.config['SECRET_KEY'] = "1234"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:2009ih43@localhost/accounts'
 db = SQLAlchemy(app)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
 # Create Table Model
-class Users(db.Model):
+class Users(UserMixin, db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(20), nullable=False, unique=True)
 	email = db.Column(db.String(120), nullable=False, unique=True)
@@ -31,16 +36,25 @@ class Users(db.Model):
 	def	verify_password(self, password):
 		return check_password_hash(self.password_hash, password)
 
-# Create a route decorator
+
+@login_manager.user_loader
+def load_user(user_id):
+	return Users.query.get(int(user_id))
+
+# Create a route decorator for home page
 @app.route('/')
+@login_required
 def home_page():
-	flash("Welcome!!")
+	flash(f"Welcome!! {current_user.username} ")
 	return render_template("home.html")
 
+# Create route for sign up page
 @app.route('/create-account', methods=["GET", "POST"])
 def create_account():
+	# import user form
 	form = UserForm()
 
+	# add user to database and check if user is already in database
 	if form.validate_on_submit():
 		user = Users.query.filter_by(email=form.email.data).first()
 
@@ -50,25 +64,31 @@ def create_account():
 			db.session.add(new_user)
 			db.session.commit()
 
+			# clear fields
 			form.username.data = ''
 			form.email.data = ''
 			form.password_hash.data = ''
 
 			flash("User Added Successfully!")
 
+			return redirect(url_for('home_page'))
+
 	our_users = Users.query.order_by(Users.id)
 	return render_template("create_account.html", form=form, our_users=our_users)
 
 
-
+# Create login route page
 @app.route('/login', methods=["GET", "POST"])
 def login():
+	# import login form
 	form = LoginForm()
 
+	# Validation
 	if form.validate_on_submit():
 		user = Users.query.filter_by(username=form.username.data).first()
 		if user:
 			if check_password_hash(user.password_hash, form.password.data):
+				login_user(user)
 				return redirect(url_for('home_page'))
 			else:
 				flash("Wrong Password - Try Again!")
@@ -76,6 +96,29 @@ def login():
 			flash("Hey that user doesn't exist! Try Again...")
 
 	return render_template("login.html", form=form)
+
+
+@app.route('/delete/<int:id>')
+def delete(id):
+	form = UserForm()
+	user_to_delete = Users.query.get_or_404(id)
+
+	try:
+		db.session.delete(user_to_delete)
+		db.session.commit()
+		flash("user deleted Successfully")
+
+		our_users = Users.query.order_by(Users.id)
+		return render_template("create_account.html", form=form, our_users=our_users)
+
+	except:
+
+		flash("problem deleting user")
+		return render_template("create_account.html", form=form, our_users=our_users)
+
+
+
+
 
 # Error Pages
 
