@@ -30,17 +30,4 @@
 		<a class="btn btn-link" href="{{ url_for('login') }}" role="button">Already Have An Account</a>
 
 	</form>
-
-	<br/><br/><br/>
-
-	<table class="table table-hover table-bordered table-striped">
-
-	{% for our_user in our_users %}
-		<tr>
-		<td>{{ our_user.id }}. {{ our_user.username }} - {{ our_user.email }} - {{ our_user.password }} - <a href="{{ url_for('delete', id=our_user.id) }}">Delete</a> </td>
-		</tr>
-	{% endfor %}
-
-	</table>
-
 {% endblock %}

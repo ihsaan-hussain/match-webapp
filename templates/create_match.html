@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Create/Edit Match</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.title.label(class="form-label") }} {{ form.title(class="form-control") }}<br>
+    {{ form.date.label(class="form-label") }} {{ form.date(class="form-control") }}<br>
+    {{ form.home_team.label(class="form-label") }} {{ form.home_team(class="form-control") }}<br>
+    {{ form.away_team.label(class="form-label") }} {{ form.away_team(class="form-control") }}<br>
+
+    <h3>Home Team</h3>
+    <div id="home-players-section"></div>
+    <button type="button" class="btn btn-secondary" onclick="addPlayer('home')">Add Home Player</button><br/>
+
+    <h3>Away Team</h3>
+    <div id="away-players-section"></div>
+    <button type="button" class="btn btn-secondary" onclick="addPlayer('away')">Add Away Player</button><br/>
+
+    {{ form.home_players_json() }}
+    {{ form.away_players_json() }}
+
+    <br/><br/><br/>
+
+    {{ form.match_score.label(class="form-label") }} {{ form.match_score(class="form-control") }}<br>
+    {{ form.possession.label(class="form-label") }} {{ form.possession(class="form-control") }}<br>
+    {{ form.motm.label(class="form-label") }} {{ form.motm(class="form-control") }}<br>
+
+    {{ form.submit(class="btn btn-secondary") }}
+    {{ form.export(class="btn btn-secondary") }}
+</form>
+<br/><br/>
+{% endblock %}
